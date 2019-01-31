@@ -3,8 +3,6 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-// var adModel = mongoose.model('adModel').schema;
-
 var BrandSchema = new Schema({
 
     name: String,

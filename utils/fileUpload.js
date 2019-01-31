@@ -4,7 +4,7 @@ const path = require('path');
 
 function checkFileType(file, cb) {
     // Allowed ext
-    const filetypes = /jpeg|jpg|png/;
+    const filetypes = /jpeg|jpg|png|mp4/;
     // Check ext
     const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
     // Check mime
@@ -13,14 +13,14 @@ function checkFileType(file, cb) {
     if (mimetype && extname) {
         return cb(null, true);
     } else {
-        cb('Error: Videos Only!');
+        cb('Error: Pictures and MP4 format Only!');
     }
 }
 
 const storageForAds = multer.diskStorage({
     destination: './public/ads/',
     filename: function (req, file, cb) {
-        cb(null, file.fieldname + '-' + (req.user.name) + '-' + (req.user.ads.length + 1) + path.extname(file.originalname));
+        cb(null, file.originalname + '-' + (req.user.name) + '-' + (req.user.ads.length + 1) + path.extname(file.originalname));
     }
 });
 

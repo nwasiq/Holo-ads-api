@@ -6,14 +6,26 @@ module.exports = function (app) {
 
     var controller = require('./controller');
 
-    app.route('/register')
-        .post(controller.register);
+    app.route('/registerApp')
+        .post(controller.registerApp);
 
-    app.route('/login')
-        .post(controller.login);
+    app.route('/registerBrand')
+        .post(controller.registerBrand);
+
+    app.route('/loginBrand')
+        .post(controller.loginBrand);
 
     app.route('/getallads')
         .get(controller.getAllAds);
+
+    app.route('/userRegister')
+        .post(controller.userRegister);
+
+    app.route('/registerDev')
+        .post(controller.registerDev);
+
+    app.route('/devLogin')
+        .post(controller.devLogin);
 
     // app.route('/deleteallads')
     //     .get(controller.deleteAllAds);

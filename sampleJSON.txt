@@ -1,0 +1,67 @@
+
+// Application / Dev
+{
+
+    "devUserName": "wasiq",
+    "devPassword": "password",
+    "appName": "new-app",
+    "interests": ["comics", "cartoons", "food"],
+    "demographic": {
+        "gender": "All",
+        "location": [{
+            "latitude": 38.2345,
+            "longitude": 187.9276
+        }, 
+        {
+            "latitude": 42.2345,
+            "longitude": 65.9276
+        }],
+        "age": {
+            "greaterThan": 18,
+            "lessThan": 25
+        },
+
+    }
+}
+
+// App user
+
+{
+    "email": "nwasiq@wasiq.com",
+    "gender": "Male",
+    "location": {
+        "latitude": 38.2345,
+        "longitude": 65.9276
+    },
+    "age": {
+            "greaterThan": 18,
+            "lessThan": 25
+    },
+}
+
+
+// Ad Model
+
+
+{
+    "adName": "nike ad",
+    "adDescription": "ad about shoes",
+    "outHyperlink": "www.outerlinkad.com",
+    "interests": ["comics", "cartoons", "food"],
+    "demographic": {
+        "gender": "All",
+        "location": [{
+            "latitude": 38.2345,
+            "longitude": 187.9276
+        }, 
+        {
+            "latitude": 42.2345,
+            "longitude": 65.9276
+        }],
+        "age": {
+            "greaterThan": 18,
+            "lessThan": 25
+        },
+
+    }
+}
