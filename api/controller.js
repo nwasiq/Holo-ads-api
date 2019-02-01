@@ -1,7 +1,7 @@
 'use strict';
 
-const AdModel = require('./models/AdModel');
-const Brand = require('./models/Brand');
+const Ad = require('./models/Ad');
+const Advertiser = require('./models/Advertiser');
 const Application = require('./models/Application');
 const User = require('./models/User');
 const Developer = require('./models/Developer')
@@ -161,22 +161,22 @@ exports.userRegister = function (req, res) {
     })
 }
 
-exports.registerBrand = function (req, res) {
-    var newBrand = new Brand(req.body);
+exports.registerAdvertiser = function (req, res) {
+    var newAdvertiser = new Advertiser(req.body);
     var username = req.body.name;
 
-    newBrand.adCounter = 0;
+    newAdvertiser.adCounter = 0;
 
-    Brand.getBrandByName(username, function (err, brand) {
+    Advertiser.getAdvertiserByName(username, function (err, advertiser) {
         if (err) throw err;
-        if (brand) {
+        if (advertiser) {
             res.json({
                 success: false,
-                msg: "this brand is already registered"
+                msg: "this advertiser is already registered"
             })
             return;
         }
-        newBrand.save(function (err, brand) {
+        newAdvertiser.save(function (err, advertiser) {
 
             if (err) {
                 res.json({
@@ -186,13 +186,13 @@ exports.registerBrand = function (req, res) {
                 });
             }
             else {
-                const token = jwt.sign(brand.toJSON(), config.secret, {
+                const token = jwt.sign(advertiser.toJSON(), config.secret, {
                     expiresIn: 604800 // 1 week
                 });
                 res.json({
                     success: true,
                     token: 'Bearer ' + token,
-                    brand: brand
+                    advertiser: advertiser
                 });
             }
         });
@@ -200,33 +200,33 @@ exports.registerBrand = function (req, res) {
 
 }
 
-exports.loginBrand = function (req, res) {
+exports.loginAdvertiser = function (req, res) {
     var username = req.body.name;
     var password = req.body.password;
-    Brand.getBrandByName(username, (err, brand) => {
+    Advertiser.getAdvertiserByName(username, (err, advertiser) => {
         if (err) throw err;
-        if (!brand) {
-            res.json({ success: false, msg: 'Brand not found' });
+        if (!advertiser) {
+            res.json({ success: false, msg: 'Advertiser not found' });
             return;
 
         }
 
         var isMatch;
 
-        if (password == brand.password)
+        if (password == advertiser.password)
             isMatch = true;
         else
             isMatch = false;
 
         if (isMatch) {
-            const token = jwt.sign(brand.toJSON(), config.secret, {
+            const token = jwt.sign(advertiser.toJSON(), config.secret, {
                 expiresIn: 604800 // 1 week
             });
 
             res.json({
                 success: true,
                 token: 'Bearer ' + token,
-                brand: brand
+                advertiser: advertiser
             });
 
         }
@@ -254,9 +254,9 @@ exports.uploadAd = function (req, res) {
                     msg: "no file selected"
                 });
             } else {
-                Brand.findOne(req.user._id, function (err, brand) {
+                Advertiser.findOne(req.user._id, function (err, advertiser) {
                     var adLink = baseURL + `/ads/${req.file.filename}`;
-                    var advert = new AdModel({
+                    var advert = new Ad({
                         adLink: adLink,
                         adType: adType,
                         adName: req.body.adName,
@@ -269,12 +269,12 @@ exports.uploadAd = function (req, res) {
                     advert.save((err, ad) => {
                         if (err) throw err;
 
-                        brand.ads.push(ad._id);
-                        brand.save((err, brand) => {
+                        advertiser.ads.push(ad._id);
+                        advertiser.save((err, advertiser) => {
                             if (err) throw err;
                             res.json({
                                 success: true,
-                                brand: brand.name,
+                                advertiser: advertiser.name,
                                 ad: ad.adLink
                             })
                         });
@@ -308,7 +308,7 @@ exports.getAds = function (req, res) {
             })
             return;
         }
-        AdModel.find(
+        Ad.find(
             {'demographic.age': {$in: user.age}, 
              'demographic.gender': {$in: user.gender},
               interests: {$in: user.interests}}, (err, ads) => {
@@ -351,7 +351,7 @@ exports.getAds = function (req, res) {
 }
 
 exports.deleteAds = function (req, res) {
-    Brand.findOne(req.user._id, function (err, brand) {
+    Advertiser.findOne(req.user._id, function (err, advertiser) {
         if (err) throw err;
 
         var fileDeleted = false;
@@ -372,15 +372,15 @@ exports.deleteAds = function (req, res) {
             if(!fileDeleted){
                 res.json({
                     success: false,
-                    msg: "No ads found for brand: " + brand.name
+                    msg: "No ads found for advertiser: " + advertiser.name
                 })
                 return;
             }
 
-            AdModel.deleteMany({ _id: { $in: brand.ads}}, (err, ads) => {
+            Ad.deleteMany({ _id: { $in: advertiser.ads}}, (err, ads) => {
                 if(err) throw err;
-                brand.ads = [];
-                brand.save(function (err) {
+                advertiser.ads = [];
+                advertiser.save(function (err) {
                     if (err) throw err;
                     res.json({
                         success: true,
@@ -418,80 +418,5 @@ exports.getAllAds = function (req, res) {
 //         })
 //     })
 // }
-
-exports.loginBrand = function (req, res) {
-    var username = req.body.name;
-    var password = req.body.password;
-    Brand.getBrandByName(username, (err, brand) => {
-        if (err) throw err;
-        if (!brand) {
-            res.json({ success: false, msg: 'Brand not found' });
-            return;
-
-        }
-
-        var isMatch;
-
-        if (password == brand.password)
-            isMatch = true;
-        else
-            isMatch = false;
-
-        if (isMatch) {
-            const token = jwt.sign(brand.toJSON(), config.secret, {
-                expiresIn: 604800 // 1 week
-            });
-
-            res.json({
-                success: true,
-                token: 'Bearer ' + token,
-                brand: brand
-            });
-
-        }
-        else {
-            res.json({ success: false, msg: 'Wrong password' });
-        }
-    })
-}
-
-exports.registerBrand = function (req, res) {
-    var newBrand = new Brand(req.body);
-    var username = req.body.name;
-
-    newBrand.adCounter = 0;
-
-    Brand.getBrandByName(username, function (err, brand) {
-        if (err) throw err;
-        if (brand) {
-            res.json({
-                success: false,
-                msg: "this brand is already registered"
-            })
-            return;
-        }
-        newBrand.save(function (err, brand) {
-
-            if (err) {
-                res.json({
-                    success: false,
-                    msg: "failed",
-                    error: err
-                });
-            }
-            else {
-                const token = jwt.sign(brand.toJSON(), config.secret, {
-                    expiresIn: 604800 // 1 week
-                });
-                res.json({
-                    success: true,
-                    token: 'Bearer ' + token,
-                    brand: brand
-                });
-            }
-        });
-    });
-
-}
 
 

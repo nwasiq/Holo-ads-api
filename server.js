@@ -3,7 +3,7 @@ var express = require('express'),
     port = process.env.PORT || 3000,
     mongoose = require('mongoose'),
     passport = require('passport'),
-    Brand = require('./api/models/Brand'), //created model loading here
+    Advertiser = require('./api/models/Advertiser'), //created model loading here
     bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
@@ -28,7 +28,7 @@ passport.serializeUser(function (user, done) {
 });
 
 passport.deserializeUser(function (id, done) {
-    Brand.findById(id, function (err, user) {
+    Advertiser.findById(id, function (err, user) {
         done(err, user);
     });
 })

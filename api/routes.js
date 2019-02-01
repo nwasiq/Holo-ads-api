@@ -13,11 +13,11 @@ module.exports = function (app) {
     app.route('/registerApp')
         .post(controller.registerApp);
 
-    app.route('/registerBrand')
-        .post(controller.registerBrand);
+    app.route('/registerAdvertiser')
+        .post(controller.registerAdvertiser);
 
-    app.route('/loginBrand')
-        .post(controller.loginBrand);
+    app.route('/loginAdvertiser')
+        .post(controller.loginAdvertiser);
 
     app.route('/getallads')
         .get(controller.getAllAds);

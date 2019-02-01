@@ -1,6 +1,6 @@
 const JwtStrategy = require('passport-jwt').Strategy;
 const ExtractJwt = require('passport-jwt').ExtractJwt;
-const BrandSchema = require('../api/models/Brand');
+const Advertiser = require('../api/models/Advertiser');
 const config = require('./database');
 
 module.exports = function (passport) {
@@ -9,13 +9,13 @@ module.exports = function (passport) {
     opts.secretOrKey = config.secret;
     passport.use(new JwtStrategy(opts, (jwt_payload, done) => {
         console.log(jwt_payload);
-        BrandSchema.getBrandById(jwt_payload._id, (err, brand) => {
+        Advertiser.getAdvertiserById(jwt_payload._id, (err, advertiser) => {
             if (err) {
                 return done(err, false);
             }
 
-            if (brand) {
-                return done(null, brand);
+            if (advertiser) {
+                return done(null, advertiser);
             } else {
                 return done(null, false);
             }

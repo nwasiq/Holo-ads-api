@@ -3,7 +3,7 @@
 var mongoose = require('mongoose');
 var schema = mongoose.Schema;
 
-var AdModelSchema = new schema({
+var AdSchema = new schema({
     adName: String,
     adDescription: String,
     adLink: String,
@@ -23,4 +23,4 @@ var AdModelSchema = new schema({
     interests: [String]
 });
 
-const adModel = module.exports = mongoose.model('adModel', AdModelSchema);
+const ad = module.exports = mongoose.model('ad', AdSchema);
