@@ -8,15 +8,12 @@ var Schema = mongoose.Schema;
 var UserSchema = new Schema({
 
     email: String,
-    gender: String,
+    gender: [String],
     location:{
         latitude: Number,
         longitude: Number
     },
-    age: {
-        greaterThan: Number,
-        lessThan: Number
-    },
+    age: [Number],
     interests: [String]
 });
 

@@ -6,6 +6,10 @@ module.exports = function (app) {
 
     var controller = require('./controller');
 
+    //temp route
+    app.route('/getUsers')
+        .get(controller.getAllUsers);
+
     app.route('/registerApp')
         .post(controller.registerApp);
 
@@ -37,10 +41,7 @@ module.exports = function (app) {
         }), controller.uploadAd);
 
     app.route('/get-ads')
-        .get(passport.authenticate('jwt', {
-            failureRedirect: '/authfailurejson',
-            session: false
-        }), controller.getAds);
+        .post(controller.getAds);
 
     app.route('/delete-ads')
         .get(passport.authenticate('jwt', {

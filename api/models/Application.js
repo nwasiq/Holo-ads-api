@@ -10,17 +10,8 @@ var AppSchema = new Schema({
     appName: String,
     interests: [String],
     demographic: {
-        gender: String,
-        location: [{
-            //must match with user
-            latitude: String,
-            longitude: String
-        }],
-        age: {
-            greaterThan: Number,
-            lessThan: Number
-        },
-
+        gender: [String],
+        age: [Number],
     }
 });
 

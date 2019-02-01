@@ -78,3 +78,5 @@ typings/
 /nbproject/private/
 
 *.docx
+
+public/

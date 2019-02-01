@@ -286,23 +286,68 @@ exports.uploadAd = function (req, res) {
     });
 }
 
+// temp func
+
+exports.getAllUsers = function(req, res) {
+    User.find({}, (err, users) => {
+        res.json({
+            users: users
+        })
+    })
+}
+
 exports.getAds = function (req, res) {
-    Brand.findOne(req.user._id)
-        .populate('ads')
-        .exec(function (err, brand) {
-            if (err) throw err;
-            if (brand.ads.length == 0) {
-                res.json({
-                    success: false,
-                    msg: "No ads found"
-                });
-                return;
-            }
+
+    let userEmail = req.body.email;
+    User.getUserByEmail(userEmail, (err, user) => {
+        if (err) throw err;
+        if(!user){
             res.json({
-                success: true,
-                ads: brand.ads
-            });
-        });
+                success: false,
+                msg: "User with this email address does not exist in the system"
+            })
+            return;
+        }
+        AdModel.find(
+            {'demographic.age': {$in: user.age}, 
+             'demographic.gender': {$in: user.gender},
+              interests: {$in: user.interests}}, (err, ads) => {
+
+                  if(err) throw err;
+                  if(ads.length == 0){
+                      res.json({
+                          success: false,
+                          msg: "No matching ads found for this user"
+                      })
+                      return;
+                  }
+
+                  res.json({
+                      success: true,
+                      ads: ads
+                  })
+                  /**
+                   * Todo: Distance matching here!!
+                   */
+
+              })
+    })
+    // Brand.findOne(req.user._id)
+    //     .populate('ads')
+    //     .exec(function (err, brand) {
+    //         if (err) throw err;
+    //         if (brand.ads.length == 0) {
+    //             res.json({
+    //                 success: false,
+    //                 msg: "No ads found"
+    //             });
+    //             return;
+    //         }
+    //         res.json({
+    //             success: true,
+    //             ads: brand.ads
+    //         });
+    //     });
 }
 
 exports.deleteAds = function (req, res) {

@@ -10,16 +10,14 @@ var AdModelSchema = new schema({
     adType: String,
     adExternalLink: String,
     demographic: {
-        gender: String,
+        gender: [String],
+        //need optimization by managing foreign location relation
         location: [{
             //must match with user
             latitude: String,
             longitude: String
         }],
-        age: {
-            greaterThan: Number,
-            lessThan: Number
-        },
+        age: [Number],
 
     },
     interests: [String]
