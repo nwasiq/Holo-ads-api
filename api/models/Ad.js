@@ -14,8 +14,9 @@ var AdSchema = new schema({
         //need optimization by managing foreign location relation
         location: [{
             //must match with user
-            latitude: String,
-            longitude: String
+            latitude: Number,
+            longitude: Number,
+            maxDistance: Number
         }],
         age: [Number],
 

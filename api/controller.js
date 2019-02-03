@@ -4,7 +4,8 @@ const Ad = require('./models/Ad');
 const Advertiser = require('./models/Advertiser');
 const Application = require('./models/Application');
 const User = require('./models/User');
-const Developer = require('./models/Developer')
+const Developer = require('./models/Developer');
+const DistanceService = require('./Services/LatLongDistanceService');
 const fs = require('fs');
 const path = require('path');
 const fileUpload = require('../utils/fileUpload');
@@ -15,12 +16,12 @@ const serverAdsPath = './public/ads/';
 const mongoose = require('mongoose');
 
 
-exports.registerDev = function(req, res) {
+exports.registerDev = function (req, res) {
     let newDev = new Developer(req.body);
     Developer.getDevByEmail(newDev.email, (err, dev) => {
         if (err) throw err;
 
-        if(dev){
+        if (dev) {
             res.json({
                 success: false,
                 msg: "this developer is already registered"
@@ -37,11 +38,11 @@ exports.registerDev = function(req, res) {
     })
 }
 
-exports.devLogin = function(req, res) {
+exports.devLogin = function (req, res) {
     let devMail = req.body.email;
     let devPass = req.body.password;
 
-    Developer.findOne({email: devMail})
+    Developer.findOne({ email: devMail })
         .populate('apps')
         .exec((err, dev) => {
             if (err) throw err;
@@ -79,9 +80,9 @@ exports.registerApp = function (req, res) {
     let devEmail = req.body.devEmail;
 
     Developer.getDevByEmail(devEmail, (err, dev) => {
-        if(err) throw err;
+        if (err) throw err;
 
-        if(!dev){
+        if (!dev) {
             res.json({
                 success: false,
                 msg: "Developer with this email does not exist"
@@ -94,7 +95,7 @@ exports.registerApp = function (req, res) {
 
             dev.apps.push(app._id);
             dev.save((err, dev) => {
-                if(err) throw err;
+                if (err) throw err;
 
                 res.json({
                     success: true,
@@ -110,22 +111,22 @@ exports.userRegister = function (req, res) {
 
     let email = req.body.email;
     let app_id = mongoose.Types.ObjectId(req.body.app_id);
-    
+
     User.getUserByEmail(email, (err, user) => {
-        if(err) throw err;
+        if (err) throw err;
 
         Application.findById(app_id, (err, app) => {
             if (err) throw err;
 
-            if(!app){
+            if (!app) {
                 res.json({
-                    success:false,
+                    success: false,
                     msg: "Application with this ID does not exist"
                 })
                 return;
             }
 
-            if(!user){
+            if (!user) {
                 let newUser = new User({
                     age: app.demographic.age,
                     interests: app.interests,
@@ -145,7 +146,7 @@ exports.userRegister = function (req, res) {
                     })
                 })
             }
-            else{
+            else {
                 user.interests.push.apply(user.interests, app.interests);
                 var uniqueInterests = [...new Set(user.interests)];
 
@@ -296,7 +297,7 @@ exports.uploadAd = function (req, res) {
 
 // temp func
 
-exports.getAllUsers = function(req, res) {
+exports.getAllUsers = function (req, res) {
     User.find({}, (err, users) => {
         res.json({
             users: users
@@ -309,7 +310,7 @@ exports.getAds = function (req, res) {
     let userEmail = req.body.email;
     User.getUserByEmail(userEmail, (err, user) => {
         if (err) throw err;
-        if(!user){
+        if (!user) {
             res.json({
                 success: false,
                 msg: "User with this email address does not exist in the system"
@@ -317,28 +318,60 @@ exports.getAds = function (req, res) {
             return;
         }
         Ad.find(
-            {'demographic.age': {$in: user.age}, 
-             'demographic.gender': {$in: user.gender},
-              interests: {$in: user.interests}}, (err, ads) => {
+            {
+                'demographic.age': { $in: user.age },
+                'demographic.gender': { $in: user.gender },
+                interests: { $in: user.interests }
+            }, (err, ads) => {
 
-                  if(err) throw err;
-                  if(ads.length == 0){
-                      res.json({
-                          success: false,
-                          msg: "No matching ads found for this user"
-                      })
-                      return;
-                  }
+                if (err) throw err;
+                if (ads.length == 0) {
+                    res.json({
+                        success: false,
+                        msg: "No matching ads found for this user"
+                    })
+                    return;
+                }
 
-                  res.json({
-                      success: true,
-                      ads: ads
-                  })
-                  /**
-                   * Todo: Distance matching here!!
-                   */
+                /**
+                 * Distance Matching
+                 */
 
-              })
+                let inRange = false;
+
+                for (var i = 0; i < ads.length; i++) {
+                    for (var j = 0; j < ads[i].demographic.location.length; j++) {
+                        let distanceFromAd = DistanceService.getDistanceFromLatLonInKm(user.location.latitude, user.location.longitude,
+                            ads[i].demographic.location[j].latitude, ads[i].demographic.location[j].longitude);
+
+                        if (distanceFromAd < ads[i].demographic.location[j].maxDistance) {
+                            inRange = true;
+                            break;
+                        }
+                    }
+
+                    if (!inRange) {
+                        ads.splice(i, 1)
+                    }
+                    else {
+                        inRange = false;
+                    }
+                }
+
+                if (ads.length == 0) {
+                    res.json({
+                        success: false,
+                        msg: "No matching ads found for this user"
+                    })
+                    return;
+                }
+
+                res.json({
+                    success: true,
+                    ads: ads
+                })
+
+            })
     })
 }
 
@@ -353,7 +386,7 @@ exports.deleteAds = function (req, res) {
 
             for (const file of files) {
 
-                if (file.toString().indexOf(req.user.name.toString()) != -1){
+                if (file.toString().indexOf(req.user.name.toString()) != -1) {
                     fileDeleted = true;
                     fs.unlink(path.join(serverAdsPath, file), err => {
                         if (err) throw err;
@@ -361,7 +394,7 @@ exports.deleteAds = function (req, res) {
                 }
             }
 
-            if(!fileDeleted){
+            if (!fileDeleted) {
                 res.json({
                     success: false,
                     msg: "No ads found for advertiser: " + advertiser.name
@@ -369,8 +402,8 @@ exports.deleteAds = function (req, res) {
                 return;
             }
 
-            Ad.deleteMany({ _id: { $in: advertiser.ads}}, (err, ads) => {
-                if(err) throw err;
+            Ad.deleteMany({ _id: { $in: advertiser.ads } }, (err, ads) => {
+                if (err) throw err;
                 advertiser.ads = [];
                 advertiser.save(function (err) {
                     if (err) throw err;
