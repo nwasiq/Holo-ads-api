@@ -117,6 +117,14 @@ exports.userRegister = function (req, res) {
         Application.findById(app_id, (err, app) => {
             if (err) throw err;
 
+            if(!app){
+                res.json({
+                    success:false,
+                    msg: "Application with this ID does not exist"
+                })
+                return;
+            }
+
             if(!user){
                 let newUser = new User({
                     age: app.demographic.age,
@@ -332,22 +340,6 @@ exports.getAds = function (req, res) {
 
               })
     })
-    // Brand.findOne(req.user._id)
-    //     .populate('ads')
-    //     .exec(function (err, brand) {
-    //         if (err) throw err;
-    //         if (brand.ads.length == 0) {
-    //             res.json({
-    //                 success: false,
-    //                 msg: "No ads found"
-    //             });
-    //             return;
-    //         }
-    //         res.json({
-    //             success: true,
-    //             ads: brand.ads
-    //         });
-    //     });
 }
 
 exports.deleteAds = function (req, res) {
@@ -393,7 +385,7 @@ exports.deleteAds = function (req, res) {
 }
 
 exports.getAllAds = function (req, res) {
-    AdModel.find({}, function (err, ads) {
+    Ad.find({}, function (err, ads) {
         if (err) throw err;
         if (ads.length == 0) {
             res.json({
